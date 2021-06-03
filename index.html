@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fourier</title>
+</head>
+
+<body>
+    <canvas id="canvas" style="border: 1px solid black;"></canvas>
+    <script>
+        var c = /** @type {HTMLCanvasElement} */ (document.getElementById("canvas"));
+        var rate, max;
+        function init() {
+            rate = window.innerWidth - 18;
+            max = window.innerHeight - 25;
+        }
+        var sin = (f, a, s = 0) => Array.from(Array(rate), (_, i) => a * Math.sin(s * 2 * Math.PI + i * f));
+        HTMLCanvasElement.prototype.render = function (x = []) {
+            this.width = rate;
+            this.height = max;
+            const ctx = this.getContext("2d");
+            if (Array.isArray(x) && x.length)
+                ctx.moveTo(0, x[0]);
+            for (const [i, e] of x.entries())
+                ctx.lineTo(i, max / 2 * (1 - e));
+            ctx.stroke();
+        }
+        Array.prototype.add = function (x) { return this.map((e, i) => e + x[i]) };
+        function animate() {
+            c.render(sin(.1, .5 * Math.sin(Date.now() / 1e3), Date.now() / 1e4).add(sin(.001 * Date.now(), .5, Date.now() / 5)));
+            requestAnimationFrame(animate);
+        }
+        window.addEventListener('load', init);
+        window.addEventListener('resize', init);
+        animate();
+    </script>
+</body>
+
+</html>
