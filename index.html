@@ -9,13 +9,18 @@
 </head>
 
 <body>
-    <canvas id="canvas" style="border: 1px solid black;"></canvas>
+    <!--<canvas class="canvas-draw" style="border: 1px solid black;"></canvas>-->
+    <canvas class="canvas-sum" style="border: 1px solid black;"></canvas>
+    <canvas class="canvas-part" style="border: 1px solid black;"></canvas>
+    <canvas class="canvas-part" style="border: 1px solid black;"></canvas>
+    <canvas class="canvas-part" style="border: 1px solid black;"></canvas>
     <script>
-        var c = /** @type {HTMLCanvasElement} */ (document.getElementById("canvas"));
+        var ss = /** @type {HTMLCanvasElement} */ (document.getElementsByClassName("canvas-sum"));
+        var cs = /** @type {HTMLCanvasElement} */ (document.getElementsByClassName("canvas-part"));
         var rate, max;
         function init() {
             rate = window.innerWidth - 18;
-            max = window.innerHeight - 25;
+            max = (window.innerHeight / 5 - 10);
         }
         var sin = (f, a, s = 0) => Array.from(Array(rate), (_, i) => a * Math.sin(s * 2 * Math.PI + i * f));
         HTMLCanvasElement.prototype.render = function (x = []) {
@@ -30,12 +35,19 @@
         }
         Array.prototype.add = function (x) { return this.map((e, i) => e + x[i]) };
         function animate() {
-            c.render(sin(.1, .5 * Math.sin(Date.now() / 1e3), Date.now() / 1e4).add(sin(.001 * Date.now(), .5, Date.now() / 5)));
+            let a = sin(.1, .333 * Math.sin(Date.now() / 1e3), Date.now() / 1e4)
+            let b = sin(.2 + .1 * Math.sin(Date.now() / 1e4), .333, Date.now() / 1e3);
+            let c = sin(1 / Math.PI, .333, Date.now() / 5e3);
+            let s = a.add(b).add(c);
+            ss[0].render(s);
+            cs[0].render(a);
+            cs[1].render(b);
+            cs[2].render(c);
             requestAnimationFrame(animate);
         }
         window.addEventListener('load', init);
         window.addEventListener('resize', init);
-        animate();
+        for (let c of cs) animate(c);
     </script>
 </body>
 
