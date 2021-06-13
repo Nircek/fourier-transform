@@ -137,6 +137,7 @@ function init() {
     sum.getElementsByClassName("controls")[0].innerHTML = "";
     cs = arr.map(e => new Oscilloscope(e));
     ss = new DrawObserver(sum, cs);
+    cs.forEach((e, i) => { e.control("freq").value = "" + (i + 1) * 1000 });
     refresh();
 }
 
