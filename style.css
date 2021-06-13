@@ -1,0 +1,63 @@
+.relative {
+    position: relative;
+}
+.vertical-center {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+html {
+    height: calc(100vh - 16px);
+    width: calc(100vw - 16px);
+    /*overflow: hidden;*/
+    margin: 8px;
+}
+
+.max {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+canvas {
+    border: 1px solid black;
+}
+
+.row {
+    height: calc(20% - 4px);
+    padding: 2px;
+}
+.place {
+    float: left;
+    margin: auto 0;
+}
+.clear {
+    clear: both;
+}
+
+.big {
+    width: 65%;
+}
+.small {
+    width: calc(35% - 4px);
+}
+
+@media screen and (min-device-width: 600px) {   
+    .big {
+        width: 80%;
+    }
+    .small {
+        width: calc(20% - 4px);
+    }
+}
+@media screen and (min-device-width: 700px) and (min-device-height: 450px) {
+    body {
+        font-size: 1.5em;
+    }
+}
+
+input[type=number] {
+    width: 8ch;
+}
