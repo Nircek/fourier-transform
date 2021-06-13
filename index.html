@@ -6,36 +6,26 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fourier</title>
-  <style>
-    html {
-      height: calc(100vh - 16px);
-      width: calc(100vw - 16px);
-      /*overflow: hidden;*/
-      margin: 8px;
-    }
-
-    body,
-    .wrapper {
-      margin: 0;
-      height: 100%;
-      width: 100%;
-    }
-
-    canvas {
-      border: 1px solid black;
-      height: calc(25% - 4px);
-      width: 100%;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
-  <div class="wrapper">
-    <!--<canvas class="canvas-draw"></canvas>-->
-    <canvas class="canvas-sum"></canvas>
-    <canvas class="canvas-part"></canvas>
-    <canvas class="canvas-part"></canvas>
-    <canvas class="canvas-part"></canvas>
+<body class="max">
+  <div class="max">
+    <div class="row place"></div>
+    <div class="clear"></div>
+
+    <div class="row oscilloscope">
+      <canvas class="max place big"></canvas>
+      <div class="place small relative max">
+        <div class="controls vertical-center">
+          <input type="checkbox" class="auto-freq"> <input type="number" class="freq" min="20" max="20000"> Hz <br>
+          <input type="checkbox" class="auto-ampl"> <input type="number" class="ampl" min="0" max="100"> % <br>
+          <input type="checkbox" class="auto-shif"> <input type="number" class="shif" min="0" max="360"> &deg;<br>
+        </div>
+      </div>
+      <div class="clear"></div>
+    </div>
+
   </div>
   <script src="script.js"></script>
 </body>
