@@ -57,7 +57,7 @@ class Oscilloscope {
     /** @param {number} y */
     onset(y) {
         if (y < this.margin || y > this.canvas.height - this.margin) return undefined;
-        return 1 - (y - this.margin) / (this.canvas.height / 2 - this.margin);
+        return (this.canvas.height - 2 * y) / (this.canvas.height - 2 * this.margin);
     }
     /**
      * @param {number[]} x
@@ -120,8 +120,9 @@ class DrawObserver extends Oscilloscope {
             case "mouseleave": this.drawing = false; break;
         }
         if (!this.drawing) return;
-        let x = ev.clientX - this.canvas.offsetLeft;
-        let y = ev.clientY - this.canvas.offsetTop;
+        let rect = this.canvas.getBoundingClientRect();
+        let x = ev.clientX - rect.left;
+        let y = ev.clientY - rect.top;
         if (this.adata.length < rate) this.adata.push(...Array(rate - this.adata.length));
         this.adata[x] = this.onset(y);
     }
@@ -140,9 +141,10 @@ function init() {
 }
 
 function refresh() {
-    rate = ss.canvas.offsetWidth;
+    let H;
+    [rate, H] = [ss.canvas.offsetWidth, ss.canvas.offsetHeight];
     for (let c of [ss, ...cs])
-        c.canvas.width = rate;
+        [c.canvas.width, c.canvas.height] = [rate, H];
     if (raf !== undefined)
         cancelAnimationFrame(raf);
     raf = requestAnimationFrame(animate);
