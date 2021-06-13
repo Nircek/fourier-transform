@@ -6,6 +6,7 @@
 
 class Oscilloscope {
     data = /** @type {number[]} */([]);
+    adata = /** @type {number[]} */([]);
     /**
      * @param {Element} e
      * @param {Oscilloscope[]?} sum
@@ -48,6 +49,16 @@ class Oscilloscope {
     get shif() {
         return this.value("shif");
     }
+    margin = 8;
+    /** @param {number} x */
+    offset(x) {
+        return this.margin + (this.canvas.height / 2 - this.margin) * (1 - x);
+    }
+    /** @param {number} y */
+    onset(y) {
+        if (y < this.margin || y > this.canvas.height - this.margin) return undefined;
+        return 1 - (y - this.margin) / (this.canvas.height / 2 - this.margin);
+    }
     /**
      * @param {number[]} x
      * @param {string | CanvasGradient | CanvasPattern} s
@@ -55,13 +66,8 @@ class Oscilloscope {
     render(x, s = "black") {
         this.ctx.strokeStyle = s;
         this.ctx.beginPath();
-        const margin = 8;
-        /** @param {number} e */
-        const off = e => margin + (this.canvas.height / 2 - margin) * (1 - e);
-        if (x.length)
-            this.ctx.moveTo(0, off(x[0]));
         for (const [i, e] of x.entries())
-            this.ctx.lineTo(i, off(e));
+            this.ctx.lineTo(i, this.offset(e));
         this.ctx.stroke();
     }
     clear() {
@@ -73,9 +79,51 @@ class Oscilloscope {
             this.data = sin(+this.freq, +this.ampl, +this.shif);
             this.render(this.data);
         } else {
-            this.render(avg(...this.sum.map(e => e.data)));
+            let primary = "black", secondary = "red";
+            if (this.adata.length) {
+                this.render(this.adata, primary);
+                primary = secondary;
+            }
+            this.render(avg(...this.sum.map(e => e.data)), primary);
         }
 
+    }
+}
+
+
+class DrawObserver extends Oscilloscope {
+    drawing = false;
+    /**
+     * @param {Element} e
+     * @param {Oscilloscope[]} sum
+     */
+    constructor(e, sum = undefined) {
+        super(e, sum);
+        this.adata = Array(rate);
+        for (let t of "mousedown mouseup mouseleave mousemove".split(" "))
+            this.canvas.addEventListener(t, this.event.bind(this));
+        let clear = document.createElement("button");
+        clear.innerText = "Clear";
+        clear.onclick = this.clearData.bind(this);
+        this.e.getElementsByClassName("controls")[0].appendChild(clear);
+    }
+    clearData() {
+        this.adata = [];
+    }
+    /**
+     * @param {MouseEvent} ev
+     */
+    event(ev) {
+        switch (ev.type) {
+            case "mousedown": this.drawing = true; break;
+            case "mouseup": this.drawing = false; break;
+            case "mouseleave": this.drawing = false; break;
+        }
+        if (!this.drawing) return;
+        let x = ev.clientX - this.canvas.offsetLeft;
+        let y = ev.clientY - this.canvas.offsetTop;
+        if (this.adata.length < rate) this.adata.push(...Array(rate - this.adata.length));
+        this.adata[x] = this.onset(y);
     }
 }
 
@@ -85,9 +133,9 @@ function init() {
         osc.parentElement.appendChild(osc.cloneNode(true));
     let arr = [...document.getElementsByClassName("oscilloscope")];
     let sum = arr.splice(0, 1)[0];
-    sum.getElementsByClassName("controls")[0].remove();
+    sum.getElementsByClassName("controls")[0].innerHTML = "";
     cs = arr.map(e => new Oscilloscope(e));
-    ss = new Oscilloscope(sum, cs);
+    ss = new DrawObserver(sum, cs);
     refresh();
 }
 
