@@ -2,53 +2,19 @@
 <html lang="pl">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fourier</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fourier</title>
 </head>
 
 <body>
-    <!--<canvas class="canvas-draw" style="border: 1px solid black;"></canvas>-->
-    <canvas class="canvas-sum" style="border: 1px solid black;"></canvas>
-    <canvas class="canvas-part" style="border: 1px solid black;"></canvas>
-    <canvas class="canvas-part" style="border: 1px solid black;"></canvas>
-    <canvas class="canvas-part" style="border: 1px solid black;"></canvas>
-    <script>
-        var ss = /** @type {HTMLCanvasElement} */ (document.getElementsByClassName("canvas-sum"));
-        var cs = /** @type {HTMLCanvasElement} */ (document.getElementsByClassName("canvas-part"));
-        var rate, max;
-        function init() {
-            rate = window.innerWidth - 18;
-            max = (window.innerHeight / 5 - 10);
-        }
-        var sin = (f, a, s = 0) => Array.from(Array(rate), (_, i) => a * Math.sin(s * 2 * Math.PI + i * f));
-        HTMLCanvasElement.prototype.render = function (x = []) {
-            this.width = rate;
-            this.height = max;
-            const ctx = this.getContext("2d");
-            if (Array.isArray(x) && x.length)
-                ctx.moveTo(0, x[0]);
-            for (const [i, e] of x.entries())
-                ctx.lineTo(i, max / 2 * (1 - e));
-            ctx.stroke();
-        }
-        Array.prototype.add = function (x) { return this.map((e, i) => e + x[i]) };
-        function animate() {
-            let a = sin(.1, .333 * Math.sin(Date.now() / 1e3), Date.now() / 1e4)
-            let b = sin(.2 + .1 * Math.sin(Date.now() / 1e4), .333, Date.now() / 1e3);
-            let c = sin(1 / Math.PI, .333, Date.now() / 5e3);
-            let s = a.add(b).add(c);
-            ss[0].render(s);
-            cs[0].render(a);
-            cs[1].render(b);
-            cs[2].render(c);
-            requestAnimationFrame(animate);
-        }
-        window.addEventListener('load', init);
-        window.addEventListener('resize', init);
-        for (let c of cs) animate(c);
-    </script>
+  <!--<canvas class="canvas-draw" style="border: 1px solid black;"></canvas>-->
+  <canvas class="canvas-sum" style="border: 1px solid black;"></canvas>
+  <canvas class="canvas-part" style="border: 1px solid black;"></canvas>
+  <canvas class="canvas-part" style="border: 1px solid black;"></canvas>
+  <canvas class="canvas-part" style="border: 1px solid black;"></canvas>
+  <script src="script.js"></script>
 </body>
 
 </html>
