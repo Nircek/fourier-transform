@@ -5,6 +5,7 @@
 /** @type {number?} */ var raf;
 
 class Oscilloscope {
+    data = /** @type {number[]} */([]);
     /**
      * @param {Element} e
      * @param {Oscilloscope[]?} sum
@@ -19,6 +20,33 @@ class Oscilloscope {
     }
     get ctx() {
         return this.canvas.getContext("2d");
+    }
+    /**
+     * @param {string} str
+     */
+    control(str) {
+        return /** @type {HTMLInputElement} */(this.e.getElementsByClassName(str)[0]);
+    }
+    /**
+     * @param {"freq"|"ampl"|"shif"} str
+     */
+    value(str) {
+        return this.control(str).value;
+    }
+    /**
+     * @param {"freq"|"ampl"|"shif"} str
+     */
+    auto(str) {
+        return this.control("auto-" + str).checked;
+    }
+    get freq() {
+        return this.value("freq");
+    }
+    get ampl() {
+        return this.value("ampl");
+    }
+    get shif() {
+        return this.value("shif");
     }
     /**
      * @param {number[]} x
@@ -38,6 +66,16 @@ class Oscilloscope {
     }
     clear() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+    animate() {
+        this.clear();
+        if (this.sum === undefined) {
+            this.data = sin(+this.freq, +this.ampl, +this.shif);
+            this.render(this.data);
+        } else {
+            this.render(avg(...this.sum.map(e => e.data)));
+        }
+
     }
 }
 
@@ -66,8 +104,11 @@ function refresh() {
 /**
  * @param {number} f
  */
-function sin(f, a = 1, s = 0) {
-    return Array.from(Array(rate), (_, i) => a * Math.sin(s * 2 * Math.PI + i * f));
+function sin(f, a = 100, s = 360) {
+    f *= 1e-4;
+    a *= 1e-2;
+    s *= Math.PI / 180;
+    return Array.from(Array(rate), (_, i) => a * Math.sin(s + i * f));
 };
 
 /**
@@ -78,16 +119,8 @@ function avg(...args) {
 };
 
 function animate() {
-    let arr = [
-        sin(.1, Math.sin(Date.now() / 1e3), Date.now() / 1e4),
-        sin(.2 + .1 * Math.sin(Date.now() / 1e4), 1, Date.now() / 1e3),
-        sin(1 / Math.PI, 1, Date.now() / 5e3)
-    ];
-    for (let [i, e] of [avg(...arr), ...arr].entries()){
-        let c = [ss, ...cs][i];
-        c.clear();
-        c.render(e);
-    }
+    for (let o of [...cs, ss])
+        o.animate();
     raf = requestAnimationFrame(animate);
 }
 window.addEventListener('load', init);
