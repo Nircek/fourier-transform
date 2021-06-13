@@ -6,14 +6,37 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fourier</title>
+  <style>
+    html {
+      height: calc(100vh - 16px);
+      width: calc(100vw - 16px);
+      /*overflow: hidden;*/
+      margin: 8px;
+    }
+
+    body,
+    .wrapper {
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    canvas {
+      border: 1px solid black;
+      height: calc(25% - 4px);
+      width: 100%;
+    }
+  </style>
 </head>
 
 <body>
-  <!--<canvas class="canvas-draw" style="border: 1px solid black;"></canvas>-->
-  <canvas class="canvas-sum" style="border: 1px solid black;"></canvas>
-  <canvas class="canvas-part" style="border: 1px solid black;"></canvas>
-  <canvas class="canvas-part" style="border: 1px solid black;"></canvas>
-  <canvas class="canvas-part" style="border: 1px solid black;"></canvas>
+  <div class="wrapper">
+    <!--<canvas class="canvas-draw"></canvas>-->
+    <canvas class="canvas-sum"></canvas>
+    <canvas class="canvas-part"></canvas>
+    <canvas class="canvas-part"></canvas>
+    <canvas class="canvas-part"></canvas>
+  </div>
   <script src="script.js"></script>
 </body>
 
