@@ -99,7 +99,7 @@ class DrawObserver extends Oscilloscope {
      */
     constructor(e, sum = undefined) {
         super(e, sum);
-        this.adata = Array(rate);
+        this.clearData();
         for (let t of "mousedown mouseup mouseleave mousemove".split(" "))
             this.canvas.addEventListener(t, this.event.bind(this));
         let clear = document.createElement("button");
@@ -108,7 +108,10 @@ class DrawObserver extends Oscilloscope {
         this.e.getElementsByClassName("controls")[0].appendChild(clear);
     }
     clearData() {
-        this.adata = [];
+        this.adata = Array(rate);
+        this.start = -Infinity;
+        this.odata = /** @type {number[]} */([]);
+        this.fodata = /** @type {number[]} */([]);
     }
     /**
      * @param {MouseEvent} ev
@@ -123,8 +126,32 @@ class DrawObserver extends Oscilloscope {
         let rect = this.canvas.getBoundingClientRect();
         let x = ev.clientX - rect.left;
         let y = ev.clientY - rect.top;
-        if (this.adata.length < rate) this.adata.push(...Array(rate - this.adata.length));
-        this.adata[x] = this.onset(y);
+        console.log(this.start, this.odata, x);
+        if (x < this.start) {
+            this.odata = [this.onset(y), ...Array(this.start - x - 1), ...this.odata];
+            this.start = x;
+        } else if (this.start == -Infinity) {
+            this.odata = [this.onset(y)];
+            this.start = x;
+        } else {
+            if (this.start + this.odata.length <= x)
+                this.odata = [...this.odata, ...Array(x - this.start - this.odata.length), this.onset(y)];
+            else
+                this.odata[x - this.start] = this.onset(y);
+        }
+        let neu = /** @type {[number, number][]} */(Array(this.odata.length));
+        let l = /** @type {[number, number]} */([NaN, NaN]); // x, y
+        for (let i = neu.length - 1; i != -1; --i)
+            l = neu[i] = this.odata[i] != null ? [i, this.odata[i]] : l;
+        this.fodata = [...this.odata]
+        for (let i = 0; i < this.odata.length - 1; ++i) { // last should be defined
+            if (this.odata[i] != null && this.odata[i + 1] == null)
+                l = [(this.odata[i] - neu[i + 1][1]) / (i - neu[i + 1][0]), this.odata[i] - (this.odata[i] - neu[i + 1][1]) / (i - neu[i + 1][0]) * i]; // a,b
+            else this.fodata[i] = l[0] * i + l[1];
+        }
+        const mod = (/** @type {number} */ a, /** @type {number} */ b) => ((a % b) + b) % b;
+        console.log(this.fodata);
+        this.adata = Array(rate).fill().map((_, i) => this.fodata[mod(i - this.start, this.fodata.length)]);
     }
 }
 
