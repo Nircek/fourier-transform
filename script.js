@@ -17,7 +17,7 @@ class Oscilloscope {
         this.r = Math.random();
     }
     get canvas() {
-        return this.e.getElementsByTagName('canvas')[0];
+        return this.e.getElementsByTagName("canvas")[0];
     }
     get ctx() {
         return this.canvas.getContext("2d");
@@ -125,32 +125,34 @@ class DrawObserver extends Oscilloscope {
         if (!this.drawing) return;
         let rect = this.canvas.getBoundingClientRect();
         let x = ev.clientX - rect.left;
-        let y = ev.clientY - rect.top;
-        console.log(this.start, this.odata, x);
+        let y = this.onset(ev.clientY - rect.top);
+        if (y == null) return;
         if (x < this.start) {
-            this.odata = [this.onset(y), ...Array(this.start - x - 1), ...this.odata];
+            this.odata = [y, ...Array(this.start - x - 1), ...this.odata];
             this.start = x;
         } else if (this.start == -Infinity) {
-            this.odata = [this.onset(y)];
+            this.odata = [y];
             this.start = x;
         } else {
             if (this.start + this.odata.length <= x)
-                this.odata = [...this.odata, ...Array(x - this.start - this.odata.length), this.onset(y)];
+                this.odata = [...this.odata, ...Array(x - this.start - this.odata.length), y];
             else
-                this.odata[x - this.start] = this.onset(y);
+                this.odata[x - this.start] = y;
         }
         let neu = /** @type {[number, number][]} */(Array(this.odata.length));
         let l = /** @type {[number, number]} */([NaN, NaN]); // x, y
         for (let i = neu.length - 1; i != -1; --i)
             l = neu[i] = this.odata[i] != null ? [i, this.odata[i]] : l;
-        this.fodata = [...this.odata]
+        this.fodata = [...this.odata];
         for (let i = 0; i < this.odata.length - 1; ++i) { // last should be defined
-            if (this.odata[i] != null && this.odata[i + 1] == null)
-                l = [(this.odata[i] - neu[i + 1][1]) / (i - neu[i + 1][0]), this.odata[i] - (this.odata[i] - neu[i + 1][1]) / (i - neu[i + 1][0]) * i]; // a,b
-            else this.fodata[i] = l[0] * i + l[1];
+            if (this.odata[i] != null) {
+                if (this.odata[i + 1] == null)
+                    l = [(this.odata[i] - neu[i + 1][1]) / (i - neu[i + 1][0]), this.odata[i] - (this.odata[i] - neu[i + 1][1]) / (i - neu[i + 1][0]) * i]; // a,b
+            } else {
+                this.fodata[i] = l[0] * i + l[1];
+            }
         }
         const mod = (/** @type {number} */ a, /** @type {number} */ b) => ((a % b) + b) % b;
-        console.log(this.fodata);
         this.adata = Array(rate).fill().map((_, i) => this.fodata[mod(i - this.start, this.fodata.length)]);
     }
 }
@@ -201,5 +203,5 @@ function animate() {
         o.animate();
     raf = requestAnimationFrame(animate);
 }
-window.addEventListener('load', init);
-window.addEventListener('resize', refresh);
+window.addEventListener("load", init);
+window.addEventListener("resize", refresh);
