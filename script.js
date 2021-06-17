@@ -192,10 +192,16 @@ class Fourier extends DrawObserver {
     event(ev) {
         DrawObserver.prototype.event.call(this, ev);
         if (!this.drawing) return;
-        for (let [i, o] of this.sum.entries()) {
-            ++i;
-            [o.freq, o.ampl, o.shif] = usin(2 * i * Math.PI / this.fodata.length, 2 / this.fodata.length * this.sinintegral(false, i), this.start);
+        const xd = /** @type {[string, string, string][]} */([]);
+        for (let i = 2; i < this.sum.length * 2 + 2; ++i) {
+            const b = i % 2 == 1, c = 2 / this.fodata.length;
+            const j = Math.floor(i / 2);
+            const f = j * Math.PI * c;
+            xd.push(usin(f, c * this.sinintegral(b, j), (b ? Math.PI / 2 : 0) - this.start * f));
         }
+        xd.sort((a, b) => Math.abs(+b[1]) - Math.abs(+a[1]));
+        for (let [i, o] of this.sum.entries())
+            [o.freq, o.ampl, o.shif] = xd[i];
     }
 }
 
@@ -236,6 +242,7 @@ function sin(f, a = 100, s = 360) {
  * @param {number} f
  * @param {number} a
  * @param {number} s
+ * @returns {[string, string, string]}
  */
 function usin(f, a, s) {
     f /= 1e-4;
