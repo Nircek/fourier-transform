@@ -207,7 +207,9 @@ class Fourier extends DrawObserver {
 
 function init() {
     var osc = document.getElementsByClassName("oscilloscope")[0];
-    for (let i = 0; i < 3; ++i)
+    const urlParams = new URLSearchParams(window.location.search);
+    const n = urlParams.get("n") ?? 3;
+    for (let i = 0; i < n; ++i)
         osc.parentElement.appendChild(osc.cloneNode(true));
     let arr = [...document.getElementsByClassName("oscilloscope")];
     let sum = arr.splice(0, 1)[0];
