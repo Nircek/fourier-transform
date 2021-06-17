@@ -49,6 +49,18 @@ class Oscilloscope {
     get shif() {
         return this.value("shif");
     }
+    set freq(x) {
+        this.control("freq").value = x;
+        this.control("auto-freq").checked = false;
+    }
+    set ampl(x) {
+        this.control("ampl").value = x;
+        this.control("auto-ampl").checked = false;
+    }
+    set shif(x) {
+        this.control("shif").value = x;
+        this.control("auto-shif").checked = false;
+    }
     margin = 8;
     /** @param {number} x */
     offset(x) {
@@ -157,6 +169,36 @@ class DrawObserver extends Oscilloscope {
     }
 }
 
+class Fourier extends DrawObserver {
+    /**
+     * @param {Element} e
+     * @param {Oscilloscope[]} sum
+     */
+    constructor(e, sum = undefined) {
+        super(e, sum);
+    }
+    sinintegral(cos = false, n = 1) {
+        const f = cos ? Math.cos : Math.sin;
+        const ff = (/** @type {number} */ i) => this.fodata[i] * f(2 * n * Math.PI * i / this.fodata.length);
+        if (this.fodata.length == 0) return 0;
+        let s = (ff(0) + ff(this.fodata.length - 1)) / 2;
+        for (let i = 1; i < this.fodata.length - 1; ++i) s += ff(i);
+        return s;
+
+    }
+    /**
+     * @param {MouseEvent} ev
+     */
+    event(ev) {
+        DrawObserver.prototype.event.call(this, ev);
+        if (!this.drawing) return;
+        for (let [i, o] of this.sum.entries()) {
+            ++i;
+            [o.freq, o.ampl, o.shif] = usin(2 * i * Math.PI / this.fodata.length, 2 / this.fodata.length * this.sinintegral(false, i), this.start);
+        }
+    }
+}
+
 function init() {
     var osc = document.getElementsByClassName("oscilloscope")[0];
     for (let i = 0; i < 3; ++i)
@@ -165,8 +207,8 @@ function init() {
     let sum = arr.splice(0, 1)[0];
     sum.getElementsByClassName("controls")[0].innerHTML = "";
     cs = arr.map(e => new Oscilloscope(e));
-    ss = new DrawObserver(sum, cs);
-    cs.forEach((e, i) => { e.control("freq").value = "" + (i + 1) * 1000 });
+    ss = new Fourier(sum, cs);
+    cs.forEach((e, i) => { e.freq = "" + (i + 1) * 1000; e.ampl = "" + 33; });
     refresh();
 }
 
@@ -190,12 +232,24 @@ function sin(f, a = 100, s = 360) {
     s *= Math.PI / 180;
     return Array.from(Array(rate), (_, i) => a * Math.sin(s + i * f));
 };
+/**
+ * @param {number} f
+ * @param {number} a
+ * @param {number} s
+ */
+function usin(f, a, s) {
+    f /= 1e-4;
+    a /= 1e-2;
+    s /= Math.PI / 180;
+    s %= 360;
+    return ["" + f, "" + a, "" + s];
+};
 
 /**
  * @param {number[][]} args
  */
 function avg(...args) {
-    return args[0].map((_, i) => args.map(e => e[i]).reduce((p, n) => p + n, 0) / args.length);
+    return args[0].map((_, i) => args.map(e => e[i]).reduce((p, n) => p + n, 0));// / args.length);
 };
 
 function animate() {
