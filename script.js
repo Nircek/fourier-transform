@@ -151,6 +151,9 @@ class DrawObserver extends Oscilloscope {
             else
                 this.odata[x - this.start] = y;
         }
+        this.continuity();
+    }
+    continuity() {
         let neu = /** @type {[number, number][]} */(Array(this.odata.length));
         let l = /** @type {[number, number]} */([NaN, NaN]); // x, y
         for (let i = neu.length - 1; i != -1; --i)
@@ -176,6 +179,15 @@ class Fourier extends DrawObserver {
      */
     constructor(e, sum = undefined) {
         super(e, sum);
+        let dc = document.createElement("button");
+        dc.innerText = "DC";
+        dc.onclick = this.dc.bind(this);
+        this.e.getElementsByClassName("controls")[0].appendChild(dc);
+    }
+    dc() {
+        let avg = this.fodata.reduce((o, e) => o + e) / this.fodata.length;
+        this.odata = this.odata.map((/** @type {number} */ e) => e == null ? e : e - avg);
+        this.continuity();
     }
     sinintegral(cos = false, n = 1) {
         const f = cos ? Math.cos : Math.sin;
@@ -192,6 +204,9 @@ class Fourier extends DrawObserver {
     event(ev) {
         DrawObserver.prototype.event.call(this, ev);
         if (!this.drawing) return;
+        this.integrate();
+    }
+    integrate() {
         const xd = /** @type {[string, string, string][]} */([]);
         for (let i = 2; i < this.sum.length * 2 + 2; ++i) {
             const b = i % 2 == 1, c = 2 / this.fodata.length;

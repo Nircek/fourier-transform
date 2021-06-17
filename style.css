@@ -61,3 +61,8 @@ canvas {
 input[type=number] {
     width: 8ch;
 }
+
+/* TODO */
+.auto-freq, .auto-ampl, .auto-shif {
+    display: none;
+}
